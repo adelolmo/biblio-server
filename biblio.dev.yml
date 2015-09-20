@@ -1,0 +1,18 @@
+# Database settings
+database:
+  driverClass: com.mysql.jdbc.Driver
+  url: jdbc:mysql://localhost/biblio?autoReconnect=true&failOverReadOnly=false&maxReconnects=20&rewriteBatchedStatements=true
+  user: root
+  password:
+  properties:
+    charSet: UTF-8
+    hibernate.dialect: org.hibernate.dialect.MySQLDialect
+  maxWaitForConnection: 1s
+  validationQuery: "/* MyService Health Check */ SELECT 1"
+  minSize: 8
+  maxSize: 32
+  checkConnectionWhileIdle: true
+
+flyway:
+  encoding: UTF-8
+  metaDataTableName: schema_version
