@@ -14,7 +14,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 /*
  * The MIT License (MIT)
@@ -51,20 +50,11 @@ public class BookResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BookResource.class);
 
-    private final AtomicLong _counter;
     private BookDao _bookDao;
 
     public BookResource(BookDao bookDao) {
         _bookDao = bookDao;
-        _counter = new AtomicLong();
     }
-
-/*    @GET
-    @Timed
-    public Saying sayHello(@QueryParam("name") Optional<String> name) {
-        final String value = String.format("Hi there! %s", name.or("Melon"));
-        return new Saying(_counter.incrementAndGet(), value);
-    }*/
 
     @POST
     @Timed
@@ -94,7 +84,6 @@ public class BookResource {
     @GET
     @Timed
     @UnitOfWork
-//    @Path("/")
     public Response readBooks() {
         final List<Book> books = _bookDao.findAll();
         return Response.ok().entity(books).build();
