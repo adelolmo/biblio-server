@@ -1,0 +1,9 @@
+#!/bin/bash
+cd $OPENSHIFT_DIY_DIR
+sed -i 's/@OPENSHIFT_DIY_IP@/'"$OPENSHIFT_DIY_IP"'/g' .openshift/biblio.openshift.yml
+sed -i 's/@OPENSHIFT_DIY_PORT@/'"$OPENSHIFT_DIY_PORT"'/g' .openshift/biblio.openshift.yml
+sed -i 's/@OPENSHIFT_APP_NAME@/'"$OPENSHIFT_APP_NAME"'/g' .openshift/biblio.openshift.yml
+#sed -i 's/@OPENSHIFT_DIY_LOG_DIR@/'"OPENSHIFT_DIY_LOG_DIR"'/g' .openshift/biblio.openshift.yml
+sed -i 's/@OPENSHIFT_MYSQL_DB_HOST@/'"$OPENSHIFT_MYSQL_DB_HOST"'/g' .openshift/biblio.openshift.yml
+sed -i 's/@OPENSHIFT_MYSQL_DB_USERNAME@/'"$OPENSHIFT_MYSQL_DB_USERNAME"'/g' .openshift/biblio.openshift.yml
+sed -i 's/@OPENSHIFT_MYSQL_DB_PASSWORD@/'"$OPENSHIFT_MYSQL_DB_PASSWORD"'/g' .openshift/biblio.openshift.yml

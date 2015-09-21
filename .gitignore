@@ -1,4 +1,4 @@
-.openshift.credentials
+server/.openshift.credentials
 
 ### Maven
 target/
