@@ -38,6 +38,7 @@ public class BookInfo {
     private String title;
     private boolean hasThumbnail;
     private InputStream thumbnail;
+    private String thumbnailUrl;
     private boolean hasSmallThumbnail;
     private InputStream smallThumbnail;
     private String isbn;
@@ -67,6 +68,14 @@ public class BookInfo {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
     }
 
     public boolean hasThumbnail() {

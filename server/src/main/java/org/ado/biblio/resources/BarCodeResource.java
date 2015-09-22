@@ -5,8 +5,8 @@ import io.dropwizard.hibernate.UnitOfWork;
 import org.ado.biblio.db.BookDao;
 import org.ado.biblio.model.BarCode;
 import org.ado.biblio.model.Book;
-import org.ado.biblio.services.BookInfoLoader;
 import org.ado.googleapis.books.BookInfo;
+import org.ado.googleapis.books.BookInfoLoader;
 import org.ado.googleapis.books.NoBookInfoFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +26,7 @@ import java.util.Date;
  * @author Andoni del Olmo
  * @since 21.09.15
  */
-@Path("/barcodes")
+@Path("/barcode")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class BarCodeResource extends GeneralResource {
@@ -54,7 +54,7 @@ public class BarCodeResource extends GeneralResource {
             final Book book = _bookDao.save(getBook(bookInfo));
 
             String uri = String.format("/books/%d", book.getId());
-            return Response.created(URI.create(uri)).build();
+            return Response.created(URI.create(uri)).entity(book).build();
 
         } catch (IOException e) {
             formatAndThrow(LOGGER, Response.Status.INTERNAL_SERVER_ERROR, "Unable to process barcode");
@@ -70,6 +70,7 @@ public class BarCodeResource extends GeneralResource {
         book.setAuthor(bookInfo.getAuthor());
         book.setIsbn(bookInfo.getIsbn());
         book.setCtime(new Date());
+        book.setImageUrl(bookInfo.getThumbnailUrl());
         return book;
     }
 }

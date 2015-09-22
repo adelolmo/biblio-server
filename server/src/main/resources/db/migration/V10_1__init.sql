@@ -1,10 +1,11 @@
 CREATE TABLE book (
-  id     INT PRIMARY KEY                     NOT NULL AUTO_INCREMENT,
-  title  VARCHAR(250)                        NOT NULL,
-  author VARCHAR(250)                        NOT NULL,
-  ctime  TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  isbn   VARCHAR(20)                         NOT NULL,
-  tags   VARCHAR(250)
+  id       INT PRIMARY KEY                     NOT NULL AUTO_INCREMENT,
+  title    VARCHAR(250)                        NOT NULL,
+  author   VARCHAR(250)                        NOT NULL,
+  ctime    TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  isbn     VARCHAR(20)                         NOT NULL,
+  tags     VARCHAR(250),
+  imageUrl VARCHAR(400)
 );
 
 CREATE TABLE lend (

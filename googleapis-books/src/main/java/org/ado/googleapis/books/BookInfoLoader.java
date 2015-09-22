@@ -3,14 +3,11 @@ package org.ado.googleapis.books;
 import com.google.gson.Gson;
 import org.ado.googleapis.books.json.*;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 
 /*
@@ -43,20 +40,16 @@ import java.util.List;
  * @author andoni
  * @since 25.10.2014
  */
-public abstract class AbstractBookInfoLoader {
+public class BookInfoLoader {
 
+    private final Logger LOGGER = LoggerFactory.getLogger(BookInfoLoader.class);
     private static final String GOOGLE_BOOKS_URL = "https://www.googleapis.com/books/v1/volumes?q=%s";
-    private final Logger LOGGER = LoggerFactory.getLogger(AbstractBookInfoLoader.class);
-
-    public abstract HttpClient getHttpClient();
 
     public BookInfo getBookInfo(String isbn) throws IOException, NoBookInfoFoundException {
-        HttpClient client = getHttpClient();
         String url = String.format(GOOGLE_BOOKS_URL, isbn);
         LOGGER.info("Book search url [{}]", url);
-        HttpResponse response = client.execute(new HttpGet(url));
 
-        Volumes volumes = new Gson().fromJson(IOUtils.toString(response.getEntity().getContent()), Volumes.class);
+        Volumes volumes = new Gson().fromJson(IOUtils.toString(new URL(url).openStream()), Volumes.class);
         if (volumes == null || volumes.getTotalItems() == 0 || volumes.getItems() == null) {
             throw new NoBookInfoFoundException(isbn);
         }
@@ -80,8 +73,7 @@ public abstract class AbstractBookInfoLoader {
 
             ImageLinks imageLinks = volumeInfo.getImageLinks();
             if (imageLinks != null) {
-                bookInfo.setThumbnail(getThumbnail(imageLinks.getThumbnail()));
-                bookInfo.setSmallThumbnail(getThumbnail(imageLinks.getSmallThumbnail()));
+                bookInfo.setThumbnailUrl(imageLinks.getThumbnail());
             }
 
             List<IndustryIdentifier> industryIdentifiers = volumeInfo.getIndustryIdentifiers();
@@ -93,13 +85,5 @@ public abstract class AbstractBookInfoLoader {
         }
 
         return bookInfo;
-    }
-
-    private InputStream getThumbnail(String url) {
-        try {
-            return getHttpClient().execute(new HttpGet(url)).getEntity().getContent();
-        } catch (Exception e) {
-            return null;
-        }
     }
 }

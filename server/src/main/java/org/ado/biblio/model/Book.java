@@ -82,6 +82,10 @@ public class Book implements Serializable {
     @Column(name = "tags")
     private String _tags;
 
+    @JsonProperty(value = "imageUrl")
+    @Column(name = "imageUrl")
+    private String _imageUrl;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -94,7 +98,8 @@ public class Book implements Serializable {
         if (_author != null ? !_author.equals(book._author) : book._author != null) return false;
         if (_ctime != null ? !_ctime.equals(book._ctime) : book._ctime != null) return false;
         if (_isbn != null ? !_isbn.equals(book._isbn) : book._isbn != null) return false;
-        return !(_tags != null ? !_tags.equals(book._tags) : book._tags != null);
+        if (_tags != null ? !_tags.equals(book._tags) : book._tags != null) return false;
+        return !(_imageUrl != null ? !_imageUrl.equals(book._imageUrl) : book._imageUrl != null);
 
     }
 
@@ -106,6 +111,7 @@ public class Book implements Serializable {
         result = 31 * result + (_ctime != null ? _ctime.hashCode() : 0);
         result = 31 * result + (_isbn != null ? _isbn.hashCode() : 0);
         result = 31 * result + (_tags != null ? _tags.hashCode() : 0);
+        result = 31 * result + (_imageUrl != null ? _imageUrl.hashCode() : 0);
         return result;
     }
 
@@ -118,6 +124,7 @@ public class Book implements Serializable {
         sb.append(", _ctime=").append(_ctime);
         sb.append(", _isbn='").append(_isbn).append('\'');
         sb.append(", _tags='").append(_tags).append('\'');
+        sb.append(", _imageUrl='").append(_imageUrl).append('\'');
         sb.append('}');
         return sb.toString();
     }
@@ -168,5 +175,13 @@ public class Book implements Serializable {
 
     public void setTags(String tags) {
         _tags = tags;
+    }
+
+    public String getImageUrl() {
+        return _imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        _imageUrl = imageUrl;
     }
 }
