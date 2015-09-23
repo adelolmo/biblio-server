@@ -74,7 +74,6 @@ public class Book implements Serializable {
     private Date _ctime;
 
     @JsonProperty(value = "isbn")
-    @NotEmpty
     @Column(name = "isbn")
     private String _isbn;
 

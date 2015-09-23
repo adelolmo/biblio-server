@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -60,8 +59,8 @@ public class BookResource extends GeneralResource {
     @Timed
     @UnitOfWork
 //    @Path("/{id}")
-    public Response createBook(@Valid Book book) {
-        if (_bookDao.findByIsbn(book.getIsbn()) != null) {
+    public Response createBook(Book book) {
+        if (book.getIsbn() != null && _bookDao.findByIsbn(book.getIsbn()) != null) {
             formatAndThrow(LOGGER, Response.Status.CONFLICT, String.format("Book with isbn %s already exists", book.getIsbn()));
         }
         final Book persistedBook = _bookDao.save(book);
