@@ -3,7 +3,7 @@ CREATE TABLE book (
   title    VARCHAR(250)                        NOT NULL,
   author   VARCHAR(250)                        NOT NULL,
   ctime    TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  isbn     VARCHAR(20),
+  isbn     VARCHAR(30) UNIQUE,
   tags     VARCHAR(250),
   imageUrl VARCHAR(400)
 );

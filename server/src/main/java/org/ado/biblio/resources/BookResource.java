@@ -58,15 +58,16 @@ public class BookResource extends GeneralResource {
     @POST
     @Timed
     @UnitOfWork
-//    @Path("/{id}")
     public Response createBook(Book book) {
-        if (book.getIsbn() != null && _bookDao.findByIsbn(book.getIsbn()) != null) {
+        final Book persistedBook;
+        try {
+            persistedBook = _bookDao.save(book);
+            String uri = String.format("/books/%s", persistedBook.getId());
+            return Response.created(URI.create(uri)).build();
+        } catch (Exception e) {
             formatAndThrow(LOGGER, Response.Status.CONFLICT, String.format("Book with isbn %s already exists", book.getIsbn()));
+            return null;
         }
-        final Book persistedBook = _bookDao.save(book);
-
-        String uri = String.format("/books/%s", persistedBook.getId());
-        return Response.created(URI.create(uri)).build();
     }
 
     @GET

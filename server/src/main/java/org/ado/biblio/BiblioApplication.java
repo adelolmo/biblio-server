@@ -11,6 +11,8 @@ import org.ado.biblio.db.BookDao;
 import org.ado.biblio.model.Book;
 import org.ado.biblio.resources.BarCodeResource;
 import org.ado.biblio.resources.BookResource;
+import org.ado.biblio.resources.IsbnResource;
+import org.ado.biblio.resources.LendResource;
 import org.skife.jdbi.v2.DBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,5 +81,7 @@ public class BiblioApplication extends Application<BiblioConfiguration> {
 
         environment.jersey().register(new BarCodeResource(bookDao));
         environment.jersey().register(new BookResource(bookDao));
+        environment.jersey().register(new IsbnResource(bookDao));
+        environment.jersey().register(new LendResource());
     }
 }

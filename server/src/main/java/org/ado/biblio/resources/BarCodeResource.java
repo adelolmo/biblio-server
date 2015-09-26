@@ -43,32 +43,34 @@ public class BarCodeResource extends GeneralResource {
     @POST
     @Timed
     @UnitOfWork
-//    @Path("/{id}")
     public Response addBarcode(@Valid BarCode barCode) {
+        BookInfo bookInfo = null;
         try {
-            if (_bookDao.findByIsbn(barCode.getIsbn()) != null) {
-                formatAndThrow(LOGGER, Response.Status.CONFLICT, String.format("Book with isbn %s already exists", barCode.getIsbn()));
-            }
-
-            final BookInfo bookInfo = _bookInfoLoader.getBookInfo(barCode.getIsbn());
-            final Book book = _bookDao.save(getBook(bookInfo));
-
-            String uri = String.format("/books/%d", book.getId());
-            return Response.created(URI.create(uri)).entity(book).build();
+            bookInfo = _bookInfoLoader.getBookInfo(barCode.getIsbn());
 
         } catch (IOException e) {
             formatAndThrow(LOGGER, Response.Status.INTERNAL_SERVER_ERROR, "Unable to process barcode");
         } catch (NoBookInfoFoundException e) {
             formatAndThrow(LOGGER, Response.Status.NOT_FOUND, String.format("Book not found with isbn %s", barCode.getIsbn()));
         }
+
+        final Book book;
+        try {
+            book = _bookDao.save(getBook(barCode.getIsbn(), bookInfo));
+            String uri = String.format("/books/%d", book.getId());
+            return Response.created(URI.create(uri)).entity(book).build();
+
+        } catch (Exception e) {
+            formatAndThrow(LOGGER, Response.Status.CONFLICT, String.format("Book with isbn %s already exists", barCode.getIsbn()));
+        }
         return null;
     }
 
-    private Book getBook(BookInfo bookInfo) {
+    private Book getBook(String isbn, BookInfo bookInfo) {
         final Book book = new Book();
         book.setTitle(bookInfo.getTitle());
         book.setAuthor(bookInfo.getAuthor());
-        book.setIsbn(bookInfo.getIsbn());
+        book.setIsbn(isbn);
         book.setCtime(new Date());
         book.setImageUrl(bookInfo.getThumbnailUrl());
         return book;
