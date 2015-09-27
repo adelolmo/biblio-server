@@ -29,8 +29,11 @@ public class CacheConfiguration {
     /** Session Expiration Property, represents the time (in seconds) a Session will live. */
     @JsonProperty
     @NotNull
-    private String sessionExpiration;
-    
+    private int sessionExpiration;
+
+    @JsonProperty
+    private String _password;
+
     /**
      * Getter for the host address for the Redis Server.
      * @return String - address
@@ -59,7 +62,15 @@ public class CacheConfiguration {
      * Getter for the Session Expiration Time, in seconds.
      * @return Integer - size.
      */
-    public String getSessionExpiration() {
+    public int getSessionExpiration() {
         return sessionExpiration;
+    }
+
+    public String getPassword() {
+        return _password;
+    }
+
+    public void setPassword(String password) {
+        _password = password;
     }
 }

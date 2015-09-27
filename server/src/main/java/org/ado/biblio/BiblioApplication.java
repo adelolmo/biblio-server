@@ -16,10 +16,12 @@ import org.ado.biblio.db.UserDao;
 import org.ado.biblio.model.Book;
 import org.ado.biblio.model.User;
 import org.ado.biblio.resources.*;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.Protocol;
 
 /*
  * The MIT License (MIT)
@@ -81,11 +83,11 @@ public class BiblioApplication extends Application<BiblioConfiguration> {
 //        final DBIFactory dbiFactory = new DBIFactory();
 //        final DBI jdbi = dbiFactory.build(environment, configuration.getDataSourceFactory(), "mysql");
 
-        CacheConfiguration cacheConfig = configuration.getCacheConfiguration();
-        final JedisPool pool = new JedisPool(cacheConfig.getAddress(), cacheConfig.getPort());
+        final CacheConfiguration cacheConfig = configuration.getCacheConfiguration();
+        final JedisPool pool = new JedisPool(new GenericObjectPoolConfig(), cacheConfig.getAddress(),
+                cacheConfig.getPort(), cacheConfig.getSessionExpiration(), cacheConfig.getPassword(), Protocol.DEFAULT_DATABASE );
 
-        Jedis jedis = pool.getResource();
-        jedis.configSet("timeout", cacheConfig.getSessionExpiration());
+        final Jedis jedis = pool.getResource();
         pool.returnResource(jedis);
 
         final UserDao userDao = new UserDao(hibernate.getSessionFactory());
@@ -99,7 +101,6 @@ public class BiblioApplication extends Application<BiblioConfiguration> {
         environment.jersey().register(new IsbnResource(bookDao));
         environment.jersey().register(new LendResource());
 
-//        environment.jersey().register(new AuthorizedProvider(userDao, sessionDao));
         environment.jersey()
                 .register(AuthFactory.binder(new TokenAuthFactory<User>(new UserAuthenticator(userDao, sessionDao), "SUPER SECRET STUFF", User.class)));
     }

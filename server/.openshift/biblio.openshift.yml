@@ -28,6 +28,7 @@ cacheConfig:
   port: @OPENSHIFT_REDIS_PORT@
   cacheSize: 1000
   sessionExpiration: 86400 # 24 hours
+  password: @REDIS_PASSWORD@
 
 logging:
   level: WARN

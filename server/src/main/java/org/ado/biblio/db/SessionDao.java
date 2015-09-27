@@ -25,7 +25,7 @@ public class SessionDao {
     
     public SessionDao(JedisPool pool, CacheConfiguration cacheConfig) {
         this.pool = pool;
-        this.sessionExpiration = Integer.parseInt(cacheConfig.getSessionExpiration());
+        this.sessionExpiration = cacheConfig.getSessionExpiration();
     }
 
     /**
