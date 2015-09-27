@@ -58,7 +58,7 @@ public class BarCodeResource extends GeneralResource {
 
         final Book book;
         try {
-            book = _bookDao.save(getBook(user,barCode.getIsbn(), bookInfo));
+            book = _bookDao.save(getBook(user, barCode.getIsbn(), bookInfo));
             String uri = String.format("/books/%d", book.getId());
             return Response.created(URI.create(uri)).entity(book).build();
 

@@ -28,23 +28,13 @@ public class UserAuthenticator implements Authenticator<TokenCredentials, User> 
 
     @Override
     public Optional<User> authenticate(TokenCredentials credentials) throws AuthenticationException {
-/*        final String sessionToken = c.getRequest().getHeaderValue(HttpHeaders.AUTHORIZATION);
-        if (sessionToken == null) {
-            ResponseException.formatAndThrow(Response.Status.UNAUTHORIZED, "Authorization header was not set");
-        }*/
-
         final String sessionToken = credentials.getSessionToken();
         final Session session = _sessionDao.lookupSession(new Session(sessionToken));
-
         final User user = _userDao.findByUsername(session.getUsername());
         if (user != null) {
             return Optional.of(user);
         }
-//        if ("secret".equals(credentials.getPassword())) {
-//            final User user = new User();
-//            user.setUsername(credentials.getUsername());
-//            return Optional.of(user);
-//        }
+        LOGGER.info("wrong credentials. no user found for token: {}", sessionToken);
         return Optional.absent();
     }
 

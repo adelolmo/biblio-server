@@ -63,10 +63,12 @@ public class BookResource extends GeneralResource {
     public Response createBook(@Auth User user, Book book) {
         final Book persistedBook;
         try {
+            book.setUser(user);
             persistedBook = _bookDao.save(book);
             String uri = String.format("/books/%s", persistedBook.getId());
             return Response.created(URI.create(uri)).build();
         } catch (Exception e) {
+            LOGGER.error("Error on creating book.", e);
             formatAndThrow(LOGGER, Response.Status.CONFLICT, String.format("Book with isbn %s already exists", book.getIsbn()));
             return null;
         }
@@ -117,6 +119,7 @@ public class BookResource extends GeneralResource {
             actualBook.setIsbn(book.getIsbn());
         }
 
+        book.setUser(user);
         final Book persistedBook = _bookDao.save(actualBook);
 
         String uri = String.format("/books/%s", persistedBook.getId());

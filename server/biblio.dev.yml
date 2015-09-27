@@ -21,7 +21,9 @@ cacheConfig:
   sessionExpiration: 86400 # 24 hours
 
 logging:
-  level: INFO
+  level: DEBUG
+  loggers:
+    "org.eclipse.jetty": INFO
   appenders:
     - type: console
       threshold: ALL

@@ -68,7 +68,7 @@ public class BiblioApplication extends Application<BiblioConfiguration> {
 
     @Override
     public String getName() {
-        return "Biblio REST Server";
+        return "Biblio REST API";
     }
 
     @Override
@@ -80,9 +80,6 @@ public class BiblioApplication extends Application<BiblioConfiguration> {
 
     @Override
     public void run(BiblioConfiguration configuration, Environment environment) throws Exception {
-//        final DBIFactory dbiFactory = new DBIFactory();
-//        final DBI jdbi = dbiFactory.build(environment, configuration.getDataSourceFactory(), "mysql");
-
         final CacheConfiguration cacheConfig = configuration.getCacheConfiguration();
         final JedisPool pool = new JedisPool(new GenericObjectPoolConfig(), cacheConfig.getAddress(),
                 cacheConfig.getPort(), cacheConfig.getSessionExpiration(), cacheConfig.getPassword(), Protocol.DEFAULT_DATABASE );

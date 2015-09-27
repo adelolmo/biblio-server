@@ -61,7 +61,7 @@ public class UserResource extends GeneralResource {
         } else {
             String sentPasswordHashed = DigestUtils.sha256Hex(existingUser.getSalt() + user.getPassword());
             if (!sentPasswordHashed.equals(existingUser.getPassword())) {
-                formatAndThrow(LOGGER, Response.Status.BAD_REQUEST, "Invalid email / password");
+                formatAndThrow(LOGGER, Response.Status.BAD_REQUEST, "Invalid username / password");
             }
             user = existingUser;
         }

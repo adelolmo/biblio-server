@@ -13,7 +13,7 @@ CREATE TABLE book (
   title    VARCHAR(255)                        NOT NULL,
   author   VARCHAR(255)                        NOT NULL,
   ctime    TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  isbn     VARCHAR(30) UNIQUE,
+  isbn     VARCHAR(30),
   tags     VARCHAR(255),
   imageUrl VARCHAR(400),
   FOREIGN KEY fk_user (userId) REFERENCES user (id)
