@@ -13,9 +13,12 @@ database:
   maxSize: 32
   checkConnectionWhileIdle: true
 
-flyway:
-  encoding: UTF-8
-  metaDataTableName: schema_version
+# Redis cache settings
+cacheConfig:
+  address: "127.0.0.1"
+  port: 6379
+  cacheSize: 1000
+  sessionExpiration: 86400 # 24 hours
 
 logging:
   level: INFO

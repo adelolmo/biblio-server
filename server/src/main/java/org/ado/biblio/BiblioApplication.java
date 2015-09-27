@@ -1,21 +1,25 @@
 package org.ado.biblio;
 
 import io.dropwizard.Application;
+import io.dropwizard.auth.AuthFactory;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
-import io.dropwizard.jdbi.DBIFactory;
 import io.dropwizard.jdbi.bundles.DBIExceptionsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import org.ado.biblio.auth.TokenAuthFactory;
+import org.ado.biblio.auth.UserAuthenticator;
+import org.ado.biblio.config.CacheConfiguration;
 import org.ado.biblio.db.BookDao;
+import org.ado.biblio.db.SessionDao;
+import org.ado.biblio.db.UserDao;
 import org.ado.biblio.model.Book;
-import org.ado.biblio.resources.BarCodeResource;
-import org.ado.biblio.resources.BookResource;
-import org.ado.biblio.resources.IsbnResource;
-import org.ado.biblio.resources.LendResource;
-import org.skife.jdbi.v2.DBI;
+import org.ado.biblio.model.User;
+import org.ado.biblio.resources.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 /*
  * The MIT License (MIT)
@@ -49,7 +53,7 @@ public class BiblioApplication extends Application<BiblioConfiguration> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BiblioApplication.class);
 
-    private final HibernateBundle<BiblioConfiguration> hibernate = new HibernateBundle<BiblioConfiguration>(Book.class) {
+    private final HibernateBundle<BiblioConfiguration> hibernate = new HibernateBundle<BiblioConfiguration>(Book.class, User.class) {
         @Override
         public DataSourceFactory getDataSourceFactory(BiblioConfiguration configuration) {
             return configuration.getDataSourceFactory();
@@ -74,14 +78,29 @@ public class BiblioApplication extends Application<BiblioConfiguration> {
 
     @Override
     public void run(BiblioConfiguration configuration, Environment environment) throws Exception {
-        final DBIFactory dbiFactory = new DBIFactory();
-        final DBI jdbi = dbiFactory.build(environment, configuration.getDataSourceFactory(), "mysql");
+//        final DBIFactory dbiFactory = new DBIFactory();
+//        final DBI jdbi = dbiFactory.build(environment, configuration.getDataSourceFactory(), "mysql");
 
+        CacheConfiguration cacheConfig = configuration.getCacheConfiguration();
+        final JedisPool pool = new JedisPool(cacheConfig.getAddress(), cacheConfig.getPort());
+
+        Jedis jedis = pool.getResource();
+        jedis.configSet("timeout", cacheConfig.getSessionExpiration());
+        pool.returnResource(jedis);
+
+        final UserDao userDao = new UserDao(hibernate.getSessionFactory());
         final BookDao bookDao = new BookDao(hibernate.getSessionFactory());
 
+        final SessionDao sessionDao = new SessionDao(pool, configuration.getCacheConfiguration());
+
+        environment.jersey().register(new UserResource(userDao, sessionDao));
         environment.jersey().register(new BarCodeResource(bookDao));
         environment.jersey().register(new BookResource(bookDao));
         environment.jersey().register(new IsbnResource(bookDao));
         environment.jersey().register(new LendResource());
+
+//        environment.jersey().register(new AuthorizedProvider(userDao, sessionDao));
+        environment.jersey()
+                .register(AuthFactory.binder(new TokenAuthFactory<User>(new UserAuthenticator(userDao, sessionDao), "SUPER SECRET STUFF", User.class)));
     }
 }

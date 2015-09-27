@@ -1,9 +1,11 @@
 package org.ado.biblio.resources;
 
 import com.codahale.metrics.annotation.Timed;
+import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.ado.biblio.db.BookDao;
 import org.ado.biblio.model.Book;
+import org.ado.biblio.model.User;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +60,7 @@ public class BookResource extends GeneralResource {
     @POST
     @Timed
     @UnitOfWork
-    public Response createBook(Book book) {
+    public Response createBook(@Auth User user, Book book) {
         final Book persistedBook;
         try {
             persistedBook = _bookDao.save(book);
@@ -74,7 +76,7 @@ public class BookResource extends GeneralResource {
     @Timed
     @UnitOfWork
     @Path("/{id}")
-    public Response readBook(@PathParam("id") Long id) {
+    public Response readBook(@Auth User user, @PathParam("id") Long id) {
         final Book book = _bookDao.findById(id);
         if (book == null) {
             formatAndThrow(LOGGER, Response.Status.NOT_FOUND, String.format("Book not found with id %s", id));
@@ -85,7 +87,7 @@ public class BookResource extends GeneralResource {
     @GET
     @Timed
     @UnitOfWork
-    public Response readBooks() {
+    public Response readBooks(@Auth User user) {
         final List<Book> books = _bookDao.findAll();
         return Response.ok().entity(books).build();
     }
@@ -94,7 +96,7 @@ public class BookResource extends GeneralResource {
     @Timed
     @UnitOfWork
     @Path("/{id}")
-    public Response updateBook(@PathParam("id") Long id,
+    public Response updateBook(@Auth User user, @PathParam("id") Long id,
                                Book book) {
         final Book actualBook = _bookDao.findById(id);
         if (actualBook == null) {
@@ -125,7 +127,7 @@ public class BookResource extends GeneralResource {
     @Timed
     @UnitOfWork
     @Path("/{id}")
-    public Response deleteBook(@PathParam("id") Long id) {
+    public Response deleteBook(@Auth User user, @PathParam("id") Long id) {
         final Book book = _bookDao.findById(id);
         if (book == null) {
             formatAndThrow(LOGGER, Response.Status.NOT_FOUND, String.format("Book not found with id %s", id));

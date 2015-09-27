@@ -7,3 +7,5 @@ sed -i 's/@OPENSHIFT_APP_NAME@/'"$OPENSHIFT_APP_NAME"'/g' .openshift/biblio.open
 sed -i 's/@OPENSHIFT_MYSQL_DB_HOST@/'"$OPENSHIFT_MYSQL_DB_HOST"'/g' .openshift/biblio.openshift.yml
 sed -i 's/@OPENSHIFT_MYSQL_DB_USERNAME@/'"$OPENSHIFT_MYSQL_DB_USERNAME"'/g' .openshift/biblio.openshift.yml
 sed -i 's/@OPENSHIFT_MYSQL_DB_PASSWORD@/'"$OPENSHIFT_MYSQL_DB_PASSWORD"'/g' .openshift/biblio.openshift.yml
+sed -i 's/@OPENSHIFT_REDIS_HOST@/'"$OPENSHIFT_REDIS_HOST"'/g' .openshift/biblio.openshift.yml
+sed -i 's/@OPENSHIFT_REDIS_PORT@/'"$OPENSHIFT_REDIS_PORT"'/g' .openshift/biblio.openshift.yml

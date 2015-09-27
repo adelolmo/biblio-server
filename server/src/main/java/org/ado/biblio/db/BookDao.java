@@ -57,11 +57,11 @@ public class BookDao extends AbstractDAO<Book> {
                 .setString("isbn", isbn));
     }
 
-    public void delete(Book book) {
-        currentSession().delete(book);
-    }
-
     public List<Book> findAll() {
         return list(namedQuery("org.ado.biblio.model.Book.findAll"));
+    }
+
+    public void delete(Book book) {
+        currentSession().delete(book);
     }
 }

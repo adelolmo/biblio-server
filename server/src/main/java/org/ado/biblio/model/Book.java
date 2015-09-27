@@ -59,6 +59,10 @@ public class Book implements Serializable {
     @Column(name = "id")
     private Long _id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userId", nullable = false)
+    private User _user;
+
     @JsonProperty(value = "title")
     @NotEmpty
     @Column(name = "title")
@@ -84,6 +88,7 @@ public class Book implements Serializable {
     @JsonProperty(value = "imageUrl")
     @Column(name = "imageUrl")
     private String _imageUrl;
+//    private User _user;
 
     @Override
     public boolean equals(Object o) {
@@ -134,6 +139,14 @@ public class Book implements Serializable {
 
     public void setId(Long id) {
         _id = id;
+    }
+
+    public void setUser(User user) {
+        _user = user;
+    }
+
+    public User getUser() {
+        return _user;
     }
 
     public String getTitle() {

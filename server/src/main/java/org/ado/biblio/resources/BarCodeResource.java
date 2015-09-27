@@ -1,10 +1,12 @@
 package org.ado.biblio.resources;
 
 import com.codahale.metrics.annotation.Timed;
+import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.ado.biblio.db.BookDao;
 import org.ado.biblio.model.BarCode;
 import org.ado.biblio.model.Book;
+import org.ado.biblio.model.User;
 import org.ado.googleapis.books.BookInfo;
 import org.ado.googleapis.books.BookInfoLoader;
 import org.ado.googleapis.books.NoBookInfoFoundException;
@@ -43,7 +45,7 @@ public class BarCodeResource extends GeneralResource {
     @POST
     @Timed
     @UnitOfWork
-    public Response addBarcode(@Valid BarCode barCode) {
+    public Response addBarcode(@Auth User user, @Valid BarCode barCode) {
         BookInfo bookInfo = null;
         try {
             bookInfo = _bookInfoLoader.getBookInfo(barCode.getIsbn());
@@ -56,7 +58,7 @@ public class BarCodeResource extends GeneralResource {
 
         final Book book;
         try {
-            book = _bookDao.save(getBook(barCode.getIsbn(), bookInfo));
+            book = _bookDao.save(getBook(user,barCode.getIsbn(), bookInfo));
             String uri = String.format("/books/%d", book.getId());
             return Response.created(URI.create(uri)).entity(book).build();
 
@@ -66,8 +68,9 @@ public class BarCodeResource extends GeneralResource {
         return null;
     }
 
-    private Book getBook(String isbn, BookInfo bookInfo) {
+    private Book getBook(User user, String isbn, BookInfo bookInfo) {
         final Book book = new Book();
+        book.setUser(user);
         book.setTitle(bookInfo.getTitle());
         book.setAuthor(bookInfo.getAuthor());
         book.setIsbn(isbn);

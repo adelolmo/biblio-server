@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.flyway.FlywayFactory;
+import org.ado.biblio.config.CacheConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +50,11 @@ public class BiblioConfiguration extends Configuration {
 
     @Valid
     @NotNull
+    @JsonProperty
+    private CacheConfiguration cacheConfig = new CacheConfiguration();
+
+    @Valid
+    @NotNull
     @JsonProperty(value = "flyway")
     private FlywayFactory _flywayFactory = new FlywayFactory();
 
@@ -62,4 +68,8 @@ public class BiblioConfiguration extends Configuration {
         return _flywayFactory;
     }
 
+    @JsonProperty("cacheConfig")
+    public CacheConfiguration getCacheConfiguration() {
+        return cacheConfig;
+    }
 }
