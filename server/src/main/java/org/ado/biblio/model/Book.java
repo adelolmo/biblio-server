@@ -39,13 +39,18 @@ import java.util.Date;
  */
 @NamedNativeQueries({
         @NamedNativeQuery(
-                name = "org.ado.biblio.model.Book.findAll",
-                query = "select * from book",
+                name = "org.ado.biblio.model.Book.findById",
+                query = "select * from book b where b.userId = :userId and b.id = :id",
                 resultClass = Book.class
         ),
         @NamedNativeQuery(
                 name = "org.ado.biblio.model.Book.findByIsbn",
-                query = "select * from book b where b.isbn = :isbn",
+                query = "select * from book b where b.id = :userId and b.isbn = :isbn",
+                resultClass = Book.class
+        ),
+        @NamedNativeQuery(
+                name = "org.ado.biblio.model.Book.findAll",
+                query = "select * from book b where b.userId = :userId",
                 resultClass = Book.class
         )
 })

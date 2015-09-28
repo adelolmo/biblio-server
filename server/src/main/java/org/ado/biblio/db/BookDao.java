@@ -26,6 +26,7 @@ package org.ado.biblio.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
 import org.ado.biblio.model.Book;
+import org.ado.biblio.model.User;
 import org.hibernate.SessionFactory;
 
 import java.util.List;
@@ -48,17 +49,21 @@ public class BookDao extends AbstractDAO<Book> {
         return persist(book);
     }
 
-    public Book findById(Long id) {
-        return get(id);
+    public Book findById(User user, Long id) {
+        return uniqueResult(namedQuery("org.ado.biblio.model.Book.findById")
+                .setLong("userId", user.getId())
+                .setLong("id", id));
     }
 
-    public Book findByIsbn(String isbn) {
+    public Book findByIsbn(User user, String isbn) {
         return uniqueResult(namedQuery("org.ado.biblio.model.Book.findByIsbn")
+                .setLong("userId", user.getId())
                 .setString("isbn", isbn));
     }
 
-    public List<Book> findAll() {
-        return list(namedQuery("org.ado.biblio.model.Book.findAll"));
+    public List<Book> findAll(User user) {
+        return list(namedQuery("org.ado.biblio.model.Book.findAll")
+                .setLong("userId", user.getId()));
     }
 
     public void delete(Book book) {

@@ -1,9 +1,11 @@
 package org.ado.biblio.resources;
 
 import com.codahale.metrics.annotation.Timed;
+import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.ado.biblio.db.BookDao;
 import org.ado.biblio.model.Book;
+import org.ado.biblio.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +33,8 @@ public class IsbnResource extends GeneralResource {
     @Timed
     @UnitOfWork
     @Path("/{isbn}")
-    public Response findBookByIsbn(@PathParam("isbn") String isbn) {
-        final Book book = _bookDao.findByIsbn(isbn);
+    public Response findBookByIsbn(@Auth User user, @PathParam("isbn") String isbn) {
+        final Book book = _bookDao.findByIsbn(user, isbn);
         if (book == null) {
             formatAndThrow(LOGGER, Response.Status.NOT_FOUND, String.format("Book not found with isbn %s", isbn));
         }

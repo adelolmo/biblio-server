@@ -79,7 +79,7 @@ public class BookResource extends GeneralResource {
     @UnitOfWork
     @Path("/{id}")
     public Response readBook(@Auth User user, @PathParam("id") Long id) {
-        final Book book = _bookDao.findById(id);
+        final Book book = _bookDao.findById(user, id);
         if (book == null) {
             formatAndThrow(LOGGER, Response.Status.NOT_FOUND, String.format("Book not found with id %s", id));
         }
@@ -90,7 +90,7 @@ public class BookResource extends GeneralResource {
     @Timed
     @UnitOfWork
     public Response readBooks(@Auth User user) {
-        final List<Book> books = _bookDao.findAll();
+        final List<Book> books = _bookDao.findAll(user);
         return Response.ok().entity(books).build();
     }
 
@@ -100,10 +100,13 @@ public class BookResource extends GeneralResource {
     @Path("/{id}")
     public Response updateBook(@Auth User user, @PathParam("id") Long id,
                                Book book) {
-        final Book actualBook = _bookDao.findById(id);
+        final Book actualBook = _bookDao.findById(user, id);
         if (actualBook == null) {
-            formatAndThrow(LOGGER, Response.Status.NOT_FOUND, String.format("Book not found with id %s", id));
+            formatAndThrow(LOGGER, Response.Status.NOT_FOUND, String.format("Book not found with id %d", id));
             return null;
+        }
+        if (!actualBook.getUser().getId().equals(user.getId())) {
+            formatAndThrow(LOGGER, Response.Status.NOT_FOUND, String.format("Book not found with id %d", id));
         }
 
         if (StringUtils.isNotBlank(book.getAuthor())) {
@@ -119,7 +122,6 @@ public class BookResource extends GeneralResource {
             actualBook.setIsbn(book.getIsbn());
         }
 
-        book.setUser(user);
         final Book persistedBook = _bookDao.save(actualBook);
 
         String uri = String.format("/books/%s", persistedBook.getId());
@@ -131,12 +133,13 @@ public class BookResource extends GeneralResource {
     @UnitOfWork
     @Path("/{id}")
     public Response deleteBook(@Auth User user, @PathParam("id") Long id) {
-        final Book book = _bookDao.findById(id);
-        if (book == null) {
-            formatAndThrow(LOGGER, Response.Status.NOT_FOUND, String.format("Book not found with id %s", id));
-        } else {
-            _bookDao.delete(book);
+        final Book actualBook = _bookDao.findById(user, id);
+        if (actualBook == null
+                || !actualBook.getUser().getId().equals(user.getId())) {
+            formatAndThrow(LOGGER, Response.Status.NOT_FOUND, String.format("Book not found with id %d", id));
+            return null;
         }
+        _bookDao.delete(actualBook);
         return Response.ok().build();
     }
 
