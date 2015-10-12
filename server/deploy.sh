@@ -17,7 +17,7 @@ create)
 
     rhc app create $APP_NAME diy-0.1 mysql-5.5 > /tmp/rhc.log
     cat /tmp/rhc.log |grep -e SSH|grep -oE "[a-z0-9@.-]*$" > .openshift.credentials
-    rhc cartridge add "http://cartreflect-claytondev.rhcloud.com/reflect?github=smarterclayton/openshift-redis-cart" -a $APP_NAME 2>&1 >/dev/null
+    rhc cartridge add "http://cartreflect-claytondev.rhcloud.com/reflect?github=adelolmo/openshift-redis-cart" -a $APP_NAME 2>&1 >/dev/null
 
     IN=`cat .openshift.credentials`
     arrIN=(${IN//@/ })
