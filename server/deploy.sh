@@ -15,6 +15,12 @@ create)
     echo "Application name: $APP_NAME"
     echo
 
+    if [ -z `which rhc` ]
+    then
+        echo "Error! Missing rhc command";
+        echo "Visit https://github.com/openshift/rhc for installation details";
+        exit 1;
+    fi
     rhc app create $APP_NAME diy-0.1 mysql-5.5 > /tmp/rhc.log
     cat /tmp/rhc.log |grep -e SSH|grep -oE "[a-z0-9@.-]*$" > .openshift.credentials
     rhc cartridge add "http://cartreflect-claytondev.rhcloud.com/reflect?github=adelolmo/openshift-redis-cart" -a $APP_NAME 2>&1 >/dev/null
