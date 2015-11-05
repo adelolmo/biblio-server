@@ -11,8 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.util.List;
 
@@ -60,12 +62,12 @@ public class BookResource extends GeneralResource {
     @POST
     @Timed
     @UnitOfWork
-    public Response createBook(@Auth User user, Book book) {
+    public Response createBook(@Auth User user, @Context UriInfo info, Book book) {
         final Book persistedBook;
         try {
             book.setUser(user);
             persistedBook = _bookDao.save(book);
-            String uri = String.format("/books/%s", persistedBook.getId());
+            String uri = String.format("%s/%s", info.getAbsolutePath().getPath(), persistedBook.getId());
             return Response.created(URI.create(uri)).build();
         } catch (Exception e) {
             LOGGER.error("Error on creating book.", e);
