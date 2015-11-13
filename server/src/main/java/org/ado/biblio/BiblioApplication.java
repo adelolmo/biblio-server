@@ -3,6 +3,8 @@ package org.ado.biblio;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthFactory;
 import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.flyway.FlywayBundle;
+import io.dropwizard.flyway.FlywayFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.jdbi.bundles.DBIExceptionsBundle;
 import io.dropwizard.setup.Bootstrap;
@@ -55,12 +57,26 @@ public class BiblioApplication extends Application<BiblioConfiguration> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BiblioApplication.class);
 
-    private final HibernateBundle<BiblioConfiguration> hibernate = new HibernateBundle<BiblioConfiguration>(Book.class, User.class) {
-        @Override
-        public DataSourceFactory getDataSourceFactory(BiblioConfiguration configuration) {
-            return configuration.getDataSourceFactory();
-        }
-    };
+    private final HibernateBundle<BiblioConfiguration> hibernate =
+            new HibernateBundle<BiblioConfiguration>(Book.class, User.class) {
+                @Override
+                public DataSourceFactory getDataSourceFactory(BiblioConfiguration configuration) {
+                    return configuration.getDataSourceFactory();
+                }
+            };
+
+    private FlywayBundle<BiblioConfiguration> flyway =
+            new FlywayBundle<BiblioConfiguration>() {
+                @Override
+                public DataSourceFactory getDataSourceFactory(BiblioConfiguration configuration) {
+                    return configuration.getDataSourceFactory();
+                }
+
+                @Override
+                public FlywayFactory getFlywayFactory(BiblioConfiguration configuration) {
+                    return configuration.getFlywayFactory();
+                }
+            };
 
     public static void main(String[] args) throws Exception {
         new BiblioApplication().run(args);
@@ -74,6 +90,7 @@ public class BiblioApplication extends Application<BiblioConfiguration> {
     @Override
     public void initialize(Bootstrap<BiblioConfiguration> bootstrap) {
         bootstrap.addBundle(hibernate);
+        bootstrap.addBundle(flyway);
         bootstrap.addBundle(new DBIExceptionsBundle());
         bootstrap.addBundle(new DBMigrationsBundle());
     }
@@ -82,7 +99,7 @@ public class BiblioApplication extends Application<BiblioConfiguration> {
     public void run(BiblioConfiguration configuration, Environment environment) throws Exception {
         final CacheConfiguration cacheConfig = configuration.getCacheConfiguration();
         final JedisPool pool = new JedisPool(new GenericObjectPoolConfig(), cacheConfig.getAddress(),
-                cacheConfig.getPort(), cacheConfig.getSessionExpiration(), cacheConfig.getPassword(), Protocol.DEFAULT_DATABASE );
+                cacheConfig.getPort(), cacheConfig.getSessionExpiration(), cacheConfig.getPassword(), Protocol.DEFAULT_DATABASE);
 
         final Jedis jedis = pool.getResource();
         pool.returnResource(jedis);

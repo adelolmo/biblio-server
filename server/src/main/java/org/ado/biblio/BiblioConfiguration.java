@@ -58,17 +58,14 @@ public class BiblioConfiguration extends Configuration {
     @JsonProperty(value = "flyway")
     private FlywayFactory _flywayFactory = new FlywayFactory();
 
-    @JsonProperty("database")
     public DataSourceFactory getDataSourceFactory() {
         return _database;
     }
 
-    @JsonProperty("flywas")
     public FlywayFactory getFlywayFactory() {
         return _flywayFactory;
     }
 
-    @JsonProperty("cacheConfig")
     public CacheConfiguration getCacheConfiguration() {
         return cacheConfig;
     }

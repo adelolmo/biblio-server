@@ -5,6 +5,8 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.flywaydb.core.Flyway;
 
+import javax.sql.DataSource;
+
 /*
  * The MIT License (MIT)
  *
@@ -37,10 +39,10 @@ public class DBMigrationsBundle implements ConfiguredBundle<BiblioConfiguration>
 
     @Override
     public void run(BiblioConfiguration configuration, Environment environment) throws Exception {
-        Flyway flyway = new Flyway();
-        flyway.setDataSource(configuration.getDataSourceFactory().getUrl(),
-                configuration.getDataSourceFactory().getUser(),
-                configuration.getDataSourceFactory().getPassword());
+        final DataSource dataSource =
+                configuration.getDataSourceFactory().build(environment.metrics(), "flyway-datasource");
+
+        final Flyway flyway = configuration.getFlywayFactory().build(dataSource);
         flyway.migrate();
     }
 
