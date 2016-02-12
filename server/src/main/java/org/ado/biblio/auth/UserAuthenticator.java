@@ -30,9 +30,11 @@ public class UserAuthenticator implements Authenticator<TokenCredentials, User> 
     public Optional<User> authenticate(TokenCredentials credentials) throws AuthenticationException {
         final String sessionToken = credentials.getSessionToken();
         final Session session = _sessionDao.lookupSession(new Session(sessionToken));
-        final User user = _userDao.findByUsername(session.getUsername());
-        if (user != null) {
-            return Optional.of(user);
+        if (session != null) {
+            final User user = _userDao.findByUsername(session.getUsername());
+            if (user != null) {
+                return Optional.of(user);
+            }
         }
         LOGGER.info("wrong credentials. no user found for token: {}", sessionToken);
         return Optional.absent();

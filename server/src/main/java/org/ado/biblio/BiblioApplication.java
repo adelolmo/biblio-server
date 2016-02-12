@@ -16,6 +16,7 @@ import org.ado.biblio.db.BookDao;
 import org.ado.biblio.db.SessionDao;
 import org.ado.biblio.db.UserDao;
 import org.ado.biblio.model.Book;
+import org.ado.biblio.model.Lend;
 import org.ado.biblio.model.User;
 import org.ado.biblio.resources.*;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -58,7 +59,7 @@ public class BiblioApplication extends Application<BiblioConfiguration> {
     private static final Logger LOGGER = LoggerFactory.getLogger(BiblioApplication.class);
 
     private final HibernateBundle<BiblioConfiguration> hibernate =
-            new HibernateBundle<BiblioConfiguration>(Book.class, User.class) {
+            new HibernateBundle<BiblioConfiguration>(Book.class, User.class, Lend.class) {
                 @Override
                 public DataSourceFactory getDataSourceFactory(BiblioConfiguration configuration) {
                     return configuration.getDataSourceFactory();

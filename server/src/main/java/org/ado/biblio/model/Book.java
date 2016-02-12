@@ -24,6 +24,7 @@ package org.ado.biblio.model;
  * SOFTWARE.
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.NamedNativeQueries;
 import org.hibernate.annotations.NamedNativeQuery;
@@ -56,6 +57,7 @@ import java.util.Date;
 })
 @Entity
 @Table(name = "book")
+@JsonIgnoreProperties({"user"})
 public class Book implements Serializable {
 
     @JsonProperty(value = "id")
