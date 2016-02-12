@@ -3,6 +3,7 @@
 APP_NAME=bibliorest
 DIY=diy
 OPENSHIFT_DIR=/var/lib/openshift
+CREDENTIALS_FILE=.openshift.credentials
 
 OPTION="$1"
 
@@ -15,17 +16,16 @@ create)
     echo "Application name: $APP_NAME"
     echo
 
-    if [ -z `which rhc` ]
-    then
+    if [ -z `which rhc` ]; then
         echo "Error! Missing rhc command";
         echo "Visit https://github.com/openshift/rhc for installation details";
         exit 1;
     fi
     rhc app create $APP_NAME diy-0.1 mysql-5.5 > /tmp/rhc.log
-    cat /tmp/rhc.log |grep -e SSH|grep -oE "[a-z0-9@.-]*$" > .openshift.credentials
-    rhc cartridge add "http://cartreflect-claytondev.rhcloud.com/reflect?github=adelolmo/openshift-redis-cart" -a $APP_NAME 2>&1 >/dev/null
+    cat /tmp/rhc.log |grep -e SSH|grep -oE "[a-z0-9@.-]*$" > $CREDENTIALS_FILE
+    rhc cartridge add "http://cartreflect-claytondev.rhcloud.com/reflect?github=adelolmo/openshift-redis-cart" -a $APP_NAME > /dev/null 2>&1
 
-    IN=`cat .openshift.credentials`
+    IN=$(cat $CREDENTIALS_FILE);
     arrIN=(${IN//@/ })
     SSH_USERNAME=${arrIN[0]}
     SSH_HOST=${arrIN[1]}
@@ -46,7 +46,13 @@ create)
     ;;
 
 deploy)
-    IN=`cat .openshift.credentials`
+    if [ ! -f $CREDENTIALS_FILE ]; then
+        echo "Error! Missing credentials file \`$CREDENTIALS_FILE'.";
+        echo "File should contain: rhc_ssh_username@rhc_ssh_host";
+        exit 1;
+    fi
+
+    IN=$(cat $CREDENTIALS_FILE);
     arrIN=(${IN//@/ })
     SSH_USERNAME=${arrIN[0]}
     SSH_HOST=${arrIN[1]}
@@ -61,12 +67,12 @@ deploy)
     echo
 
     echo "> build artifact"
-    mvn -f ../pom.xml clean package 2>&1 >/dev/null
+    mvn -f ../pom.xml clean package > /dev/null 2>&1
 
     echo "> generate version.txt"
     ls target/biblio-server*.jar|grep -oE "([0-9]\.[0-9]+)(-SNAPSHOT)?"> /tmp/version.txt
     scp /tmp/version.txt $SSH_CMD:$REMOTE_HOME/$DIY
-    echo "Version: `cat /tmp/version.txt`"
+    echo "Version: $(cat /tmp/version.txt)"
     rm /tmp/version.txt
 
     echo "> copying scripts"
