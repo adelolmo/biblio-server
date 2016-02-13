@@ -1,5 +1,6 @@
 package org.ado.biblio.db;
 
+import com.google.common.base.Optional;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.ado.biblio.model.User;
 import org.hibernate.SessionFactory;
@@ -26,9 +27,9 @@ public class UserDao extends AbstractDAO<User> {
         return get(id);
     }
 
-    public User findByUsername(String username) {
-        return uniqueResult(namedQuery("org.ado.biblio.model.User.findByUsername")
-                .setString("username", username));
+    public Optional<User> findByUsername(String username) {
+        return Optional.fromNullable(uniqueResult(namedQuery("org.ado.biblio.model.User.findByUsername")
+                .setString("username", username)));
     }
 
     public void delete(User user) {

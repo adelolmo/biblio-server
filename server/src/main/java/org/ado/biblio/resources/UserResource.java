@@ -3,6 +3,7 @@ package org.ado.biblio.resources;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import com.google.common.base.Optional;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.ado.biblio.core.Session;
@@ -32,7 +33,7 @@ public class UserResource extends GeneralResource {
     private final UserDao _userDao;
     private final SessionDao _sessionDao;
 
-    public UserResource(UserDao userDao, SessionDao sessionDao) {
+    public UserResource(final UserDao userDao, final SessionDao sessionDao) {
         _userDao = userDao;
         _sessionDao = sessionDao;
     }
@@ -41,34 +42,38 @@ public class UserResource extends GeneralResource {
     @Timed
     @UnitOfWork
     @ExceptionMetered
-    public Response post(@Valid User user) {
-        final User existingUser = _userDao.findByUsername(user.getUsername());
-        if (existingUser == null) {
-            final Random r = new SecureRandom();
-            byte[] saltBytes = new byte[32];
-            r.nextBytes(saltBytes);
+    public Response post(@Valid final CreateUserRequest request) {
+        final Optional<User> existingUser = _userDao.findByUsername(request.username());
+        if (!existingUser.isPresent()) {
+            final byte[] saltBytes = new byte[32];
+            new SecureRandom().nextBytes(saltBytes);
             final String salt = DigestUtils.sha256Hex(saltBytes);
-            user.setSalt(salt);
-            user.setPassword(DigestUtils.sha256Hex(salt + user.getPassword()));
-            user.setRole(UserRole.USER);
+            final User user = new User(request.username(),
+                    salt,
+                    DigestUtils.sha256Hex(salt + request.password()),
+                    UserRole.USER);
 
             _userDao.save(user);
+
+            return Response.created(
+                    UriBuilder.fromResource(UserResource.class)
+                            .path("/{id}")
+                            .resolveTemplate("id", user.getId())
+                            .build())
+                    .header("Session-Token",
+                            _sessionDao.createSession(user.getUsername()).getSession())
+                    .build();
         } else {
-            final String sentPasswordHashed = DigestUtils.sha256Hex(existingUser.getSalt() + user.getPassword());
-            if (!sentPasswordHashed.equals(existingUser.getPassword())) {
+            final String sentPasswordHashed =
+                    DigestUtils.sha256Hex(existingUser.get().getSalt() + request.password());
+            if (!sentPasswordHashed.equals(existingUser.get().getPassword())) {
                 formatAndThrow(LOGGER, Response.Status.BAD_REQUEST, "Invalid username / password");
             }
-            user = existingUser;
+            return Response.noContent()
+                    .header("Session-Token",
+                            _sessionDao.createSession(existingUser.get().getUsername()).getSession())
+                    .build();
         }
-
-        final Session session = _sessionDao.createSession(user.getUsername());
-        return Response.created(
-                UriBuilder.fromResource(UserResource.class)
-                        .path("/{id}")
-                        .resolveTemplate("id", user.getId())
-                        .build())
-                .header("Session-Token", session.getSession())
-                .build();
     }
 
     @PUT
@@ -102,8 +107,14 @@ public class UserResource extends GeneralResource {
     @Timed
     @UnitOfWork
     @ExceptionMetered
-    public User get(@Auth User existingUser, @PathParam("id") Long id) {
-        return existingUser;
+    public Response get(@Auth final User existingUser, @PathParam("id") final Long id) {
+        if (!existingUser.getId().equals(id)) {
+            return Response
+                    .status(Response.Status.UNAUTHORIZED)
+                    .entity("Unauthorized access to another user.")
+                    .build();
+        }
+        return Response.ok().entity(existingUser).build();
     }
 
     @DELETE

@@ -31,10 +31,11 @@ public class UserAuthenticator implements Authenticator<TokenCredentials, User> 
         final String sessionToken = credentials.getSessionToken();
         final Session session = _sessionDao.lookupSession(new Session(sessionToken));
         if (session != null) {
-            final User user = _userDao.findByUsername(session.getUsername());
-            if (user != null) {
-                return Optional.of(user);
-            }
+            final Optional<User> user = _userDao.findByUsername(session.getUsername());
+            return user;
+//            if (user != null) {
+//                return Optional.of(user);
+//            }
         }
         LOGGER.info("wrong credentials. no user found for token: {}", sessionToken);
         return Optional.absent();

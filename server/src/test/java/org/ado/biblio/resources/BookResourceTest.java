@@ -2,6 +2,7 @@ package org.ado.biblio.resources;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Optional;
 import io.dropwizard.auth.AuthFactory;
 import io.dropwizard.jackson.Jackson;
 import io.dropwizard.testing.junit.ResourceTestRule;
@@ -66,7 +67,7 @@ public class BookResourceTest {
         user.setUsername("username");
         user.setPassword("passwordHashed");
         user.setRole(UserRole.USER);
-        when(_userDaoMock.findByUsername("username")).thenReturn(user);
+        when(_userDaoMock.findByUsername("username")).thenReturn(Optional.of(user));
     }
 
     @After
