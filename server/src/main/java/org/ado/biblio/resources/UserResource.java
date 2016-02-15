@@ -9,6 +9,7 @@ import io.dropwizard.hibernate.UnitOfWork;
 import org.ado.biblio.core.Session;
 import org.ado.biblio.db.SessionDao;
 import org.ado.biblio.db.UserDao;
+import org.ado.biblio.error.AuthenticationErrorException;
 import org.ado.biblio.model.User;
 import org.ado.biblio.model.UserRole;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -67,7 +68,7 @@ public class UserResource extends GeneralResource {
             final String sentPasswordHashed =
                     DigestUtils.sha256Hex(existingUser.get().getSalt() + request.password());
             if (!sentPasswordHashed.equals(existingUser.get().getPassword())) {
-                formatAndThrow(LOGGER, Response.Status.BAD_REQUEST, "Invalid username / password");
+                throw new AuthenticationErrorException();
             }
             return Response.noContent()
                     .header("Session-Token",
@@ -95,7 +96,7 @@ public class UserResource extends GeneralResource {
             existingUser.setRole(user.getRole());
         }
         if (user.getUsername() != null) {
-            formatAndThrow(LOGGER, Response.Status.BAD_REQUEST, "You cannot update username");
+            throw new IllegalArgumentException("You cannot update username");
         }
         _userDao.save(existingUser);
 
@@ -123,7 +124,7 @@ public class UserResource extends GeneralResource {
     @ExceptionMetered
     public String delete(@Auth User existingUser, @HeaderParam("Authorization") String sessionToken) {
         if (existingUser.getUsername().equals("admin")) {
-            formatAndThrow(LOGGER, Response.Status.BAD_REQUEST, "You cannot delete the admin user");
+            throw new IllegalArgumentException("You cannot delete the admin user");
         }
         _userDao.delete(existingUser);
         Session session = new Session(sessionToken);

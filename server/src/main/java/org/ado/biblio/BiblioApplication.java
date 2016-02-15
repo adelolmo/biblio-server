@@ -15,10 +15,18 @@ import org.ado.biblio.config.CacheConfiguration;
 import org.ado.biblio.db.BookDao;
 import org.ado.biblio.db.SessionDao;
 import org.ado.biblio.db.UserDao;
+import org.ado.biblio.error.AuthenticationErrorMapper;
+import org.ado.biblio.error.IdGenerator;
+import org.ado.biblio.error.IllegalArgumentExceptionMapper;
+import org.ado.biblio.error.UnexpectedExceptionMapper;
 import org.ado.biblio.model.Book;
 import org.ado.biblio.model.Lend;
 import org.ado.biblio.model.User;
-import org.ado.biblio.resources.*;
+import org.ado.biblio.resources.BarCodeResource;
+import org.ado.biblio.resources.BookResource;
+import org.ado.biblio.resources.IsbnResource;
+import org.ado.biblio.resources.LendResource;
+import org.ado.biblio.resources.UserResource;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,5 +126,10 @@ public class BiblioApplication extends Application<BiblioConfiguration> {
 
         environment.jersey()
                 .register(AuthFactory.binder(new TokenAuthFactory<User>(new UserAuthenticator(userDao, sessionDao), "SUPER SECRET STUFF", User.class)));
+
+        final IdGenerator idGenerator = new IdGenerator();
+        environment.jersey().register(new UnexpectedExceptionMapper(idGenerator));
+        environment.jersey().register(AuthenticationErrorMapper.class);
+        environment.jersey().register(IllegalArgumentExceptionMapper.class);
     }
 }
