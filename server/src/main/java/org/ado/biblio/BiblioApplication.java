@@ -19,14 +19,8 @@ import org.ado.biblio.error.*;
 import org.ado.biblio.model.Book;
 import org.ado.biblio.model.Lend;
 import org.ado.biblio.model.User;
-import org.ado.biblio.resources.BarCodeResource;
-import org.ado.biblio.resources.BookResource;
-import org.ado.biblio.resources.IsbnResource;
-import org.ado.biblio.resources.LendResource;
-import org.ado.biblio.resources.UserResource;
+import org.ado.biblio.resources.*;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Protocol;
@@ -60,8 +54,6 @@ import redis.clients.jedis.Protocol;
  * @since 16.09.15
  */
 public class BiblioApplication extends Application<BiblioConfiguration> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(BiblioApplication.class);
 
     private final HibernateBundle<BiblioConfiguration> hibernate =
             new HibernateBundle<BiblioConfiguration>(Book.class, User.class, Lend.class) {
@@ -127,8 +119,12 @@ public class BiblioApplication extends Application<BiblioConfiguration> {
         environment.jersey().register(new IsbnResource(bookDao));
         environment.jersey().register(new LendResource());
 
-        environment.jersey()
-                .register(AuthFactory.binder(new TokenAuthFactory<User>(new UserAuthenticator(userDao, sessionDao), "SUPER SECRET STUFF", User.class)));
+        environment.jersey().register(
+                AuthFactory.binder(
+                        new TokenAuthFactory<>(
+                                new UserAuthenticator(userDao, sessionDao),
+                                "SECURITY REALM",
+                                User.class)));
 
     }
 }
