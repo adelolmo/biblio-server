@@ -2,6 +2,7 @@ package org.ado.biblio.db;
 
 import org.ado.biblio.config.CacheConfiguration;
 import org.ado.biblio.core.Session;
+import org.ado.biblio.error.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -9,9 +10,7 @@ import redis.clients.jedis.JedisPool;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import java.util.List;
-import java.util.Set;
 
 /**
  * The Session Data Access Object contains methods for accessing and modifying
@@ -61,23 +60,22 @@ public class SessionDao {
      *
      * @param session The Session object to query in the data store and update.
      */
-    public Session lookupSession(Session session) {
-        String keyLookup = SESSION_KEY_PREFIX + session.getSession();
-        Jedis jedis = pool.getResource();
-        Set<String> fields = jedis.hkeys(keyLookup);
-        if (fields.isEmpty()) {
+    public Session lookupSession(final Session session) {
+        final String keyLookup = SESSION_KEY_PREFIX + session.getSession();
+        final Jedis jedis = pool.getResource();
+        if (jedis.hkeys(keyLookup).isEmpty()) {
             LOGGER.debug("session token not found. {}", session.getSession());
-            formatAndThrow(Status.NOT_FOUND, "The session token supplied does not exist");
+            throw new UnauthorizedException("Invalid session token");
         }
 
-        String[] valKeys = new String[]{Session.USERNAME_PARAM};
-        List<String> values = jedis.hmget(keyLookup, valKeys);
+        final String[] valKeys = new String[]{Session.USERNAME_PARAM};
+        final List<String> values = jedis.hmget(keyLookup, valKeys);
         if (values == null || values.size() != valKeys.length) {
-            // Something went wrong, log and throw
-            formatAndThrow(Status.NOT_FOUND, "The requested session was found to be invalid");
+            LOGGER.debug("The requested session was found to be invalid. {}", session.getSession());
+            throw new UnauthorizedException("Invalid session token");
         }
 
-        Session queried = new Session(session.getSession());
+        final Session queried = new Session(session.getSession());
         queried.setUsername(values.get(0));
         pool.returnResource(jedis);
         return queried;

@@ -16,8 +16,8 @@ public class CreateUserRequest {
     private String password;
 
     @JsonCreator
-    public CreateUserRequest(@JsonProperty("username") String username,
-                             @JsonProperty("password") String password) {
+    public CreateUserRequest(@JsonProperty("username") final String username,
+                             @JsonProperty("password") final String password) {
         this.username = username;
         this.password = password;
     }

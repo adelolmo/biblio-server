@@ -17,12 +17,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import java.security.SecureRandom;
-import java.util.Random;
 
 @Path("/users")
 @Produces(MediaType.APPLICATION_JSON)
@@ -43,15 +42,16 @@ public class UserResource extends GeneralResource {
     @Timed
     @UnitOfWork
     @ExceptionMetered
-    public Response post(@Valid final CreateUserRequest request) {
+    public Response post(@Valid @NotNull final CreateUserRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException();
+        }
         final Optional<User> existingUser = _userDao.findByUsername(request.username());
         if (!existingUser.isPresent()) {
-            final byte[] saltBytes = new byte[32];
-            new SecureRandom().nextBytes(saltBytes);
-            final String salt = DigestUtils.sha256Hex(saltBytes);
+            final PasswordHashed passwordHashed = PasswordEncoder.encode(request.password());
             final User user = new User(request.username(),
-                    salt,
-                    DigestUtils.sha256Hex(salt + request.password()),
+                    passwordHashed.salt(),
+                    passwordHashed.encodedPassword(),
                     UserRole.USER);
 
             _userDao.save(user);
@@ -83,14 +83,9 @@ public class UserResource extends GeneralResource {
     @ExceptionMetered
     public User put(@Auth User existingUser, User user) {
         if (user.getPassword() != null) {
-            Random r = new SecureRandom();
-            byte[] saltBytes = new byte[32];
-            r.nextBytes(saltBytes);
-            String salt = DigestUtils.sha256Hex(saltBytes);
-            existingUser.setSalt(salt);
-            String password = user.getPassword();
-            String hashedPassword = DigestUtils.sha256Hex(salt + password);
-            existingUser.setPassword(hashedPassword);
+            final PasswordHashed passwordHashed = PasswordEncoder.encode(user.getPassword());
+            existingUser.setSalt(passwordHashed.salt());
+            existingUser.setPassword(passwordHashed.encodedPassword());
         }
         if (user.getRole() != null) {
             existingUser.setRole(user.getRole());

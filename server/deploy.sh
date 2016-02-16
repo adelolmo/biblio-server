@@ -4,6 +4,7 @@ APP_NAME=bibliorest
 DIY=diy
 OPENSHIFT_DIR=/var/lib/openshift
 CREDENTIALS_FILE=.openshift.credentials
+TMP=/tmp/biblio
 
 OPTION="$1"
 
@@ -66,27 +67,34 @@ deploy)
     echo "Host: $SSH_HOST"
     echo
 
+    echo "> setup"
+    rm -rf $TMP
+    mkdir -p $TMP
+
     echo "> build artifact"
     mvn -f ../pom.xml clean package > /dev/null 2>&1
 
-    echo "> generate version.txt"
-    ls target/biblio-server*.jar|grep -oE "([0-9]\.[0-9]+)(-SNAPSHOT)?"> /tmp/version.txt
-    scp /tmp/version.txt $SSH_CMD:$REMOTE_HOME/$DIY
-    echo "Version: $(cat /tmp/version.txt)"
-    rm /tmp/version.txt
+    echo "> generate version"
+    version=$(ls target/biblio-server*.jar|grep -oE "([0-9]\.[0-9]+)(-SNAPSHOT)?")
+    datetime=$(date +"%d.%m.%Y %T")
+    echo "$version ($datetime)" > $TMP/version.txt
+    echo "  Version: $version ($datetime)"
+    scp $TMP/version.txt $SSH_CMD:$REMOTE_HOME/$DIY
 
     echo "> copying scripts"
     scp -r .openshift $SSH_CMD:$REMOTE_HOME/$DIY
 
     echo "> deploying artifact"
-    mkdir -p /tmp/biblio-server
-    cp target/biblio-server*.jar /tmp/biblio-server/biblio-server.jar
-    scp /tmp/biblio-server/biblio-server.jar $SSH_CMD:$REMOTE_HOME/$DIY
+    cp target/biblio-server*.jar $TMP/biblio-server.jar
+    scp $TMP/biblio-server.jar $SSH_CMD:$REMOTE_HOME/$DIY
 
     echo "> restart application"
     ssh $SSH_CMD "$REMOTE_HOME/$DIY/.openshift/action_hooks/stop"
     ssh $SSH_CMD "$REMOTE_HOME/$DIY/.openshift/action_hooks/deploy"
     ssh $SSH_CMD "$REMOTE_HOME/$DIY/.openshift/action_hooks/start"
+
+    echo "> cleanup"
+    rm -rf $TMP
 
     echo "done"
     ;;

@@ -18,8 +18,8 @@ public class UserAuthenticator implements Authenticator<TokenCredentials, User> 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserAuthenticator.class);
 
-    private UserDao _userDao;
-    private SessionDao _sessionDao;
+    private final UserDao _userDao;
+    private final SessionDao _sessionDao;
 
     public UserAuthenticator(UserDao userDao, SessionDao sessionDao) {
         _userDao = userDao;
@@ -27,17 +27,13 @@ public class UserAuthenticator implements Authenticator<TokenCredentials, User> 
     }
 
     @Override
-    public Optional<User> authenticate(TokenCredentials credentials) throws AuthenticationException {
+    public Optional<User> authenticate(final TokenCredentials credentials) throws AuthenticationException {
         final String sessionToken = credentials.getSessionToken();
         final Session session = _sessionDao.lookupSession(new Session(sessionToken));
         if (session != null) {
-            final Optional<User> user = _userDao.findByUsername(session.getUsername());
-            return user;
-//            if (user != null) {
-//                return Optional.of(user);
-//            }
+            return _userDao.findByUsername(session.getUsername());
         }
-        LOGGER.info("wrong credentials. no user found for token: {}", sessionToken);
+        LOGGER.debug("wrong credentials. no user found for token: {}", sessionToken);
         return Optional.absent();
     }
 

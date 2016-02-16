@@ -15,10 +15,7 @@ import org.ado.biblio.config.CacheConfiguration;
 import org.ado.biblio.db.BookDao;
 import org.ado.biblio.db.SessionDao;
 import org.ado.biblio.db.UserDao;
-import org.ado.biblio.error.AuthenticationErrorMapper;
-import org.ado.biblio.error.IdGenerator;
-import org.ado.biblio.error.IllegalArgumentExceptionMapper;
-import org.ado.biblio.error.UnexpectedExceptionMapper;
+import org.ado.biblio.error.*;
 import org.ado.biblio.model.Book;
 import org.ado.biblio.model.Lend;
 import org.ado.biblio.model.User;
@@ -106,6 +103,12 @@ public class BiblioApplication extends Application<BiblioConfiguration> {
 
     @Override
     public void run(BiblioConfiguration configuration, Environment environment) throws Exception {
+        final IdGenerator idGenerator = new IdGenerator();
+        environment.jersey().register(new UnexpectedExceptionMapper(idGenerator));
+        environment.jersey().register(AuthenticationErrorMapper.class);
+        environment.jersey().register(UnauthorizedExceptionMapper.class);
+        environment.jersey().register(IllegalArgumentExceptionMapper.class);
+
         final CacheConfiguration cacheConfig = configuration.getCacheConfiguration();
         final JedisPool pool = new JedisPool(new GenericObjectPoolConfig(), cacheConfig.getAddress(),
                 cacheConfig.getPort(), cacheConfig.getSessionExpiration(), cacheConfig.getPassword(), Protocol.DEFAULT_DATABASE);
@@ -127,9 +130,5 @@ public class BiblioApplication extends Application<BiblioConfiguration> {
         environment.jersey()
                 .register(AuthFactory.binder(new TokenAuthFactory<User>(new UserAuthenticator(userDao, sessionDao), "SUPER SECRET STUFF", User.class)));
 
-        final IdGenerator idGenerator = new IdGenerator();
-        environment.jersey().register(new UnexpectedExceptionMapper(idGenerator));
-        environment.jersey().register(AuthenticationErrorMapper.class);
-        environment.jersey().register(IllegalArgumentExceptionMapper.class);
     }
 }

@@ -15,7 +15,7 @@ database:
 
 # Redis cache settings
 cacheConfig:
-  address: "127.0.0.1"
+  address: 127.0.0.1
   port: 6379
   cacheSize: 1000
   sessionExpiration: 86400 # 24 hours
@@ -23,7 +23,8 @@ cacheConfig:
 logging:
   level: DEBUG
   loggers:
-    "org.eclipse.jetty": INFO
+    org.eclipse.jetty: WARN
+    org.hibernate.engine: ERROR
   appenders:
     - type: console
       threshold: ALL
