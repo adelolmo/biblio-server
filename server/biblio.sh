@@ -22,28 +22,28 @@ create)
         echo "Visit https://github.com/openshift/rhc for installation details";
         exit 1;
     fi
-    rhc app create $APP_NAME diy-0.1 mysql-5.5 > /tmp/rhc.log
-    cat /tmp/rhc.log |grep -e SSH|grep -oE "[a-z0-9@.-]*$" > $CREDENTIALS_FILE
+    rhc app create $APP_NAME diy-0.1 mysql-5.5 > $TMP/rhc.log
+    cat $TMP/rhc.log |grep -e SSH|grep -oE "[a-z0-9@.-]*$" > $CREDENTIALS_FILE
     rhc cartridge add "http://cartreflect-claytondev.rhcloud.com/reflect?github=adelolmo/openshift-redis-cart" -a $APP_NAME > /dev/null 2>&1
 
     IN=$(cat $CREDENTIALS_FILE);
     arrIN=(${IN//@/ })
-    SSH_USERNAME=${arrIN[0]}
-    SSH_HOST=${arrIN[1]}
-    SSH_CMD=$SSH_USERNAME@$SSH_HOST
-    REMOTE_HOME=$OPENSHIFT_DIR/$SSH_USERNAME
-    OPENSHIFT_DIY_DIR=$OPENSHIFT_DIR/$SSH_USERNAME/$DIY
+    ssh_username=${arrIN[0]}
+    ssh_host=${arrIN[1]}
+    ssh_cmd=$ssh_username@$ssh_host
+    remote_home=$OPENSHIFT_DIR/$ssh_username
+    openshift_diy_dir=$OPENSHIFT_DIR/$ssh_username/$DIY
 
-    echo REMOTE_HOME=$REMOTE_HOME
-    echo OPENSHIFT_DIY_DIR=$OPENSHIFT_DIY_DIR
+    echo remote_home=$remote_home
+    echo openshift_diy_dir=$openshift_diy_dir
 
     echo "> stop ruby service"
-    ssh $SSH_CMD pkill ruby
+    ssh $ssh_cmd pkill ruby
 
     echo "> replace gear action_hooks start"
-    echo "$OPENSHIFT_DIY_DIR/.openshift/action_hooks/start" > /tmp/openshift_start
-    scp /tmp/openshift_start $SSH_CMD:$REMOTE_HOME/app-root/repo/.openshift/action_hooks/start
-    rm /tmp/openshift_start
+    echo "$openshift_diy_dir/.openshift/action_hooks/start" > $TMP/openshift_start
+    scp $TMP/openshift_start $ssh_cmd:$remote_home/app-root/repo/.openshift/action_hooks/start
+    rm $TMP/openshift_start
     ;;
 
 deploy)
@@ -55,16 +55,16 @@ deploy)
 
     IN=$(cat $CREDENTIALS_FILE);
     arrIN=(${IN//@/ })
-    SSH_USERNAME=${arrIN[0]}
-    SSH_HOST=${arrIN[1]}
-    SSH_CMD=$SSH_USERNAME@$SSH_HOST
-    REMOTE_HOME=$OPENSHIFT_DIR/$SSH_USERNAME
+    ssh_username=${arrIN[0]}
+    ssh_host=${arrIN[1]}
+    ssh_command=$ssh_username@$ssh_host
+    remote_home=$OPENSHIFT_DIR/$ssh_username
 
     echo "======================"
     echo "Deploying to OpenShift"
     echo "======================"
     echo
-    echo "Host: $SSH_HOST"
+    echo "Host: $ssh_host"
     echo
 
     echo "> setup"
@@ -79,19 +79,19 @@ deploy)
     datetime=$(date +"%d.%m.%Y %T")
     echo "$version ($datetime)" > $TMP/version.txt
     echo "  Version: $version ($datetime)"
-    scp $TMP/version.txt $SSH_CMD:$REMOTE_HOME/$DIY
+    scp $TMP/version.txt $ssh_command:$remote_home/$DIY
 
     echo "> copying scripts"
-    scp -r .openshift $SSH_CMD:$REMOTE_HOME/$DIY
+    scp -r .openshift $ssh_command:$remote_home/$DIY
 
     echo "> deploying artifact"
     cp target/biblio-server*.jar $TMP/biblio-server.jar
-    scp $TMP/biblio-server.jar $SSH_CMD:$REMOTE_HOME/$DIY
+    scp $TMP/biblio-server.jar $ssh_command:$remote_home/$DIY
 
     echo "> restart application"
-    ssh $SSH_CMD "$REMOTE_HOME/$DIY/.openshift/action_hooks/stop"
-    ssh $SSH_CMD "$REMOTE_HOME/$DIY/.openshift/action_hooks/deploy"
-    ssh $SSH_CMD "$REMOTE_HOME/$DIY/.openshift/action_hooks/start"
+    ssh $ssh_command "$remote_home/$DIY/.openshift/action_hooks/stop"
+    ssh $ssh_command "$remote_home/$DIY/.openshift/action_hooks/deploy"
+    ssh $ssh_command "$remote_home/$DIY/.openshift/action_hooks/start"
 
     echo "> cleanup"
     rm -rf $TMP
