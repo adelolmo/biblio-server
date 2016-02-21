@@ -9,6 +9,8 @@ import io.dropwizard.hibernate.UnitOfWork;
 import org.ado.biblio.core.Session;
 import org.ado.biblio.db.SessionDao;
 import org.ado.biblio.db.UserDao;
+import org.ado.biblio.encode.PasswordEncoder;
+import org.ado.biblio.encode.PasswordHashed;
 import org.ado.biblio.error.AuthenticationErrorException;
 import org.ado.biblio.model.User;
 import org.ado.biblio.model.UserRole;

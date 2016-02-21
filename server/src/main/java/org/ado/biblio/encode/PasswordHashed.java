@@ -1,4 +1,4 @@
-package org.ado.biblio.resources;
+package org.ado.biblio.encode;
 
 /**
  * @author Andoni del Olmo
