@@ -1,28 +1,40 @@
-#!/bin/bash
+#!/bin/sh
 
-RELEASE_VERSION=$1
-DEVELOPMENT_VERSION=$2
+set -e
 
-MVN=/opt/maven/apache-maven-3.0.5/bin/mvn
+DEVELOPMENT_VERSION=$1
+MVN=$(which mvn)
+
+if [ -z $MVN ]; then
+    echo "Error! Missing Apache Maven!"
+    echo "Please visit https://maven.apache.org/download.cgi for installation help."
+    echo
+    exit 1
+fi
 
 usage(){
-	echo "Usage: $0 release_version development_version"
+	echo "Usage: $0 [next_development_version]"
 }
 
 run(){
-	$MVN versions:set -DnewVersion="$RELEASE_VERSION" &&
-	git commit -a -m "prepare to release v.$RELEASE_VERSION" &&
-	git push &&
-	$MVN clean install -Prelease &&
-	$MVN versions:set -DnewVersion="$DEVELOPMENT_VERSION-SNAPSHOT" &&
-	git commit -a -m "prepare to develop v.$DEVELOPMENT_VERSION-SNAPSHOT" &&
-	git push &&
-	find -name "*.versionsBackup"| xargs -I file rm file
+    echo "run! $1 $2"
+	$MVN versions:set -DnewVersion="$1" > /dev/null 2>&1
+	git commit -a -m "prepare to release v.$1"
+	git push
+	$MVN clean install -Prelease > /dev/null 2>&1
+	$MVN versions:set -DnewVersion="$2" > /dev/null 2>&1
+#	git commit -a -m "prepare to develop v.$2"
+#	git push
+#	find -name "*.versionsBackup"| xargs -I file rm file
 }
 
-if [[ -n "$RELEASE_VERSION" && -n "$DEVELOPMENT_VERSION" ]]; then
-	run
-else
-	usage
-	exit 1
-fi
+release_version=$(grep -oP '(?<=<version>).*(?=</version>)' pom.xml|sed -n "1p"|grep -oE "[0-9\.]+")
+
+#if [ -z "$DEVELOPMENT_VERSION" ]; then
+    current_mayor_version=$( echo $release_version | grep -Eo "(^[0-9]*)" )
+    current_minor_version=$( echo $release_version | grep -Eo "([0-9]*$)")
+    next_minor_version=$(( current_minor_version + 1 ))
+	run $release_version "$current_mayor_version.$next_minor_version-SNAPSHOT"
+#else
+#    run $DEVELOPMENT_VERSION
+#fi
