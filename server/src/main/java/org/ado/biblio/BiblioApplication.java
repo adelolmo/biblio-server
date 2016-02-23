@@ -1,5 +1,6 @@
 package org.ado.biblio;
 
+import de.thomaskrille.dropwizard_template_config.TemplateConfigBundle;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthFactory;
 import io.dropwizard.db.DataSourceFactory;
@@ -87,6 +88,7 @@ public class BiblioApplication extends Application<BiblioConfiguration> {
 
     @Override
     public void initialize(Bootstrap<BiblioConfiguration> bootstrap) {
+        bootstrap.addBundle(new TemplateConfigBundle());
         bootstrap.addBundle(hibernate);
         bootstrap.addBundle(flyway);
         bootstrap.addBundle(new DBIExceptionsBundle());

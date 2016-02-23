@@ -4,15 +4,15 @@ server:
   adminContextPath: /admin
   connector:
     type: http
-    port: @OPENSHIFT_DIY_PORT@
-    bindHost: @OPENSHIFT_DIY_IP@
+    port: ${env.OPENSHIFT_DIY_PORT}
+    bindHost: ${env.OPENSHIFT_DIY_IP}
 
 # Database settings
 database:
   driverClass: com.mysql.jdbc.Driver
-  url: jdbc:mysql://@OPENSHIFT_MYSQL_DB_HOST@/@OPENSHIFT_APP_NAME@?autoReconnect=true&failOverReadOnly=false&maxReconnects=20&rewriteBatchedStatements=true
-  user: @OPENSHIFT_MYSQL_DB_USERNAME@
-  password: @OPENSHIFT_MYSQL_DB_PASSWORD@
+  url: jdbc:mysql://${env.OPENSHIFT_MYSQL_DB_HOST}/${env.OPENSHIFT_APP_NAME}?autoReconnect=true&failOverReadOnly=false&maxReconnects=20&rewriteBatchedStatements=true
+  user: ${env.OPENSHIFT_MYSQL_DB_USERNAME}
+  password: ${env.OPENSHIFT_MYSQL_DB_PASSWORD}
   properties:
     charSet: UTF-8
     hibernate.dialect: org.hibernate.dialect.MySQLDialect
@@ -24,11 +24,11 @@ database:
 
 # Redis cache settings
 cacheConfig:
-  address: @OPENSHIFT_REDIS_HOST@
-  port: @OPENSHIFT_REDIS_PORT@
+  address: ${env.OPENSHIFT_REDIS_HOST}
+  port: ${env.OPENSHIFT_REDIS_PORT}
   cacheSize: 1000
   sessionExpiration: 86400 # 24 hours
-  password: @REDIS_PASSWORD@
+  password: ${env.REDIS_PASSWORD}
 
 logging:
   level: WARN
@@ -39,9 +39,9 @@ logging:
   appenders:
     - type: console
     - type: file
-      currentLogFilename: diy/log/biblio.log
+      currentLogFilename: ${env.OPENSHIFT_DIY_LOG_DIR}biblio.log
       threshold: ALL
       archive: true
-      archivedLogFilenamePattern: diy/log/biblio-%d.log
+      archivedLogFilenamePattern: ${env.OPENSHIFT_DIY_LOG_DIR}biblio-%d.log
       archivedFileCount: 5
       timeZone: UTC

@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/sh
+
+set -e
 
 APP_NAME=bibliorest
 DIY=diy
@@ -85,12 +87,10 @@ deploy)
     scp -r .openshift $ssh_command:$remote_home/$DIY
 
     echo "> deploying artifact"
-    cp target/biblio-server*.jar $TMP/biblio-server.jar
-    scp $TMP/biblio-server.jar $ssh_command:$remote_home/$DIY
+    scp target/biblio-server*.jar $ssh_command:$remote_home/$DIY/biblio-server.jar
 
     echo "> restart application"
     ssh $ssh_command "$remote_home/$DIY/.openshift/action_hooks/stop"
-    ssh $ssh_command "$remote_home/$DIY/.openshift/action_hooks/deploy"
     ssh $ssh_command "$remote_home/$DIY/.openshift/action_hooks/start"
 
     echo "> cleanup"
