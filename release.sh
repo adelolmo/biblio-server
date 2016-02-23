@@ -23,9 +23,9 @@ run(){
 	git push
 	$MVN clean install -Prelease > /dev/null 2>&1
 	$MVN versions:set -DnewVersion="$2" > /dev/null 2>&1
-#	git commit -a -m "prepare to develop v.$2"
-#	git push
-#	find -name "*.versionsBackup"| xargs -I file rm file
+	git commit -a -m "prepare to develop v.$2"
+	git push
+	find -name "*.versionsBackup"| xargs -I file rm file
 }
 
 release_version=$(grep -oP '(?<=<version>).*(?=</version>)' pom.xml|sed -n "1p"|grep -oE "[0-9\.]+")
