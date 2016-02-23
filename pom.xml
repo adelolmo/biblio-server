@@ -115,4 +115,9 @@
         </pluginManagement>
     </build>
 
+    <scm>
+        <url>git:git@github.com:adelolmo/biblio-server.git</url>
+        <connection>scm:git:git@github.com:adelolmo/biblio-server.git</connection>
+        <developerConnection>scm:git:git@github.com:adelolmo/biblio-server.git</developerConnection>
+    </scm>
 </project>
