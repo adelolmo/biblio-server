@@ -18,7 +18,10 @@ usage(){
 }
 
 run(){
-    echo "run! $1 $2"
+    echo "***************"
+    echo " Release v.$1"
+    echo "***************"
+
     # create local branch
     echo "> Creating $1 branch ..."
     git checkout -b $1
@@ -29,15 +32,16 @@ run(){
 	git commit -a -m "release v.$1"
    	echo "> Pushing $1 branch ..."
     git push --set-upstream origin $1
+
 	# change to master branch
 	echo "> Creating v.$2 for development ..."
-#	git fetch
 	git checkout master
 	# set development version
 	$MVN versions:set -DnewVersion="$2" > /dev/null 2>&1
 	git commit -a -m "prepare to develop v.$2"
 	echo "> Pushing origin/master ..."
 	git push origin master
+
 	# cleanup
 	find -name "*.versionsBackup"| xargs -I file rm file
 }
