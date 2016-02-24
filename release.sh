@@ -20,24 +20,24 @@ usage(){
 run(){
     echo "run! $1 $2"
     # create local branch
-    echo "Creating $1 branch ..."
+    echo "> Creating $1 branch ..."
     git checkout -b $1
 	# set branch release version
-	echo "Building v.$1 ..."
+	echo "> Building v.$1 ..."
 	$MVN versions:set -DnewVersion="$1" > /dev/null 2>&1
 	$MVN clean install -Prelease > /dev/null 2>&1
 	git commit -a -m "release v.$1"
-   	echo "Pushing $1 branch ..."
+   	echo "> Pushing $1 branch ..."
     git push --set-upstream origin $1
 	# change to master branch
-	echo "Creating v.$2 for development ..."
+	echo "> Creating v.$2 for development ..."
 	git fetch
 	git checkout origin/master
 	# set development version
 	$MVN versions:set -DnewVersion="$2" > /dev/null 2>&1
 	git commit -a -m "prepare to develop v.$2"
-	echo "Pushing origin/master ..."
-	git push
+	echo "> Pushing origin/master ..."
+	git push --set-upstream origin master
 	# cleanup
 	find -name "*.versionsBackup"| xargs -I file rm file
 }
