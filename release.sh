@@ -14,17 +14,26 @@ fi
 
 usage(){
 	echo "Usage: $0 [next_development_version]"
+	exit 1
 }
 
 run(){
     echo "run! $1 $2"
+    # create local branch
+    echo "Creating $1 branch..."
+    git checkout -b $1
+	# set branch release version
 	$MVN versions:set -DnewVersion="$1" > /dev/null 2>&1
-	git commit -a -m "prepare to release v.$1"
-	git push
 	$MVN clean install -Prelease > /dev/null 2>&1
+	git commit -a -m "release v.$1"
+	git push
+	# change to master branch
+	git checkout origin/master
+	# set development version
 	$MVN versions:set -DnewVersion="$2" > /dev/null 2>&1
 	git commit -a -m "prepare to develop v.$2"
 	git push
+	# cleanup
 	find -name "*.versionsBackup"| xargs -I file rm file
 }
 
@@ -32,7 +41,7 @@ release_version=$(grep -oP '(?<=<version>).*(?=</version>)' pom.xml|sed -n "1p"|
 
 #if [ -z "$DEVELOPMENT_VERSION" ]; then
     current_mayor_version=$( echo $release_version | grep -Eo "(^[0-9]*)" )
-    current_minor_version=$( echo $release_version | grep -Eo "([0-9]*$)")
+    current_minor_version=$( echo $release_version | grep -Eo "([0-9]*$)" )
     next_minor_version=$(( current_minor_version + 1 ))
 	run $release_version "$current_mayor_version.$next_minor_version-SNAPSHOT"
 #else
