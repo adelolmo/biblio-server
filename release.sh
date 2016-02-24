@@ -37,7 +37,7 @@ run(){
 	$MVN versions:set -DnewVersion="$2" > /dev/null 2>&1
 	git commit -a -m "prepare to develop v.$2"
 	echo "> Pushing origin/master ..."
-	git push --set-upstream origin master
+	git push origin master
 	# cleanup
 	find -name "*.versionsBackup"| xargs -I file rm file
 }
