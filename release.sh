@@ -31,8 +31,8 @@ run(){
     git push --set-upstream origin $1
 	# change to master branch
 	echo "> Creating v.$2 for development ..."
-	git fetch
-	git checkout origin/master
+#	git fetch
+	git checkout master
 	# set development version
 	$MVN versions:set -DnewVersion="$2" > /dev/null 2>&1
 	git commit -a -m "prepare to develop v.$2"
