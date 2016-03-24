@@ -1,1 +1,1 @@
-nohup java -jar $OPENSHIFT_DIY_DIR/biblio-server.jar server $OPENSHIFT_DIY_DIR/.openshift/biblio.openshift.yml > $OPENSHIFT_DIY_LOG_DIR/console.log 2>&1 &
+nohup java -jar "$OPENSHIFT_DIY_DIR"biblio-server.jar server "$OPENSHIFT_DIY_DIR".openshift/biblio.openshift.yml > "$OPENSHIFT_DIY_LOG_DIR"console.log 2>&1 &
